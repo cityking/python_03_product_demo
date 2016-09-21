@@ -1,0 +1,118 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>产品添加</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+
+  
+  <form class="form-horizontal" method="post" action={% url 'add' %}>
+    {% csrf_token %}
+    <fieldset>
+      <div id="legend" class="">
+        <legend class="">添加产品</legend>
+      </div>
+    
+
+    <div class="control-group">
+
+          <!-- Text input-->
+          <label class="control-label" for="input01">产品名</label>
+          <div class="controls">
+            <input type="text" placeholder="请输入产品名称" class="input-xlarge" name = "product_name">
+            <p class="help-block"></p>
+          </div>
+        </div>
+
+    
+
+    <div class="control-group">
+
+          <!-- Select Basic -->
+          <label class="control-label">产品型号</label>
+          <div class="controls">
+            <select class="input-xlarge" name = "product_spec">
+      <option value="1">大号</option>
+      <option value="2">中号</option>
+      <option value="3">小号</option></select>
+          </div>
+
+        </div>
+
+    <div class="control-group">
+
+          <!-- Select Basic -->
+          <label class="control-label">产品类别</label>
+          <div class="controls">
+            <select class="input-xlarge" name = "product_category">
+                {% for category in categorys %}
+                    <option value={{ category.id }}>{{ category.name }}</option>
+                {% endfor %}
+
+            </select>
+          </div>
+
+        </div>
+
+    <div class="control-group">
+
+          <!-- Text input-->
+          <label class="control-label" for="input01">库存数量</label>
+          <div class="controls">
+            <input type="text" placeholder="请输入库存数量" class="input-xlarge" name = "product_stock">
+            <p class="help-block"></p>
+          </div>
+        </div>
+        <div class="control-group">
+
+          <!-- Text input-->
+          <label class="control-label" for="input01">产品价格</label>
+          <div class="controls">
+            <input type="text" placeholder="请输入产品价格" class="input-xlarge" name = "product_price">
+            <p class="help-block"></p>
+          </div>
+        </div>
+        <div class="control-group">
+
+          <!-- Select Multiple -->
+          <label class="control-label">产品关键词</label>
+          <div class="controls">
+            <select class="input-xlarge" multiple="multiple" name = "product_key">
+                {% for key in keywords %}
+                    <option value={{ key.id }}>{{ key.name }}</option>
+                {% endfor %}
+            </select>
+
+          </div>
+        </div>
+        <div class="control-group">
+
+          <!-- Textarea -->
+          <label class="control-label">产品描述</label>
+          <div class="controls">
+            <div class="textarea">
+                  <textarea type="" class="" name = "product_desc"> </textarea>
+            </div>
+          </div>
+        </div>
+
+    <div class="control-group">
+          <label class="control-label"></label>
+
+          <!-- Button -->
+          <div class="controls">
+            <button class="btn btn-primary">添加</button>
+          </div>
+        </div>
+
+    </fieldset>
+  </form>
+
+
+</body>
+</html>
