@@ -1,0 +1,140 @@
+1、交流&答疑
+2、
+2.1、认识这个框架
+2.2、Django入门项目讲解
+
+
+第一步，安装python2.7并配置好环境变量
+第二步，更新pip并安装virtualenv
+		python -m pip install --upgrade pip 
+		pip install virtualenv
+	创建虚拟环境，virtualenv product_venv
+	where pip 查看pip位置
+第二步，在虚拟环境里面安装django和mysql驱动(mysql-python)
+	*pip install django==1.8.2
+	pip freeze 查看安装的包
+	*安装mysql-python之前先安装好依赖库：
+		VCForPython27.msi http://aka.ms/vcpython27
+		mysql-connector-c-6.0.2-winx64.msi
+
+	下载mysql-python.exe安装
+		https://pypi.python.org/pypi/MySQL-python/1.2.5
+		把C:\Python27\Lib\site-packages下的
+			MySQL_python-1.2.5-py2.7.egg-info
+			MySQLdb
+			_mysql.pyd
+			_mysql_exceptions
+		复制到虚拟环境即可
+
+	
+	*下载mysql-python的源码包，https://pypi.python.org/pypi/MySQL-python/1.2.5
+	修改site.cfg：
+		connector = C:\Program Files\MySQL\MySQL Connector C 6.0.2
+	*进入源码目录，最后执行，python setup.py install从源码安装
+
+	*****注意：python与mysql-python一定要都是32位的
+
+第三步，创建Django的项目（工具pycharm）
+	创建工程product_demo 创建app product（startapp product）
+	创建文件夹static，把静态文件复制到static文件夹中
+	在templates文件夹下创建文件夹product并把模板文件如Html文件复制进去
+	配置模板和静态文件的路径，修改settings.py文件
+		TEMPLATES = [
+    			{'DIRS': ['templates'],},
+		]
+		STATICFILES_DIRS = (
+    			os.path.join(BASE_DIR, 'static'),
+		)
+	
+
+第四步，实现产品的增、删、改、查等操作。。。
+	修改模板文件的静态文件引入路径
+	模板文件开头添加{% load staticfiles %}
+	然后修改样式引入路径
+		<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    		<script src="{% static 'js/jquery.min.js' %}"></script>
+    		<script src="{% static 'js/bootstrap.min.js' %}"></script>
+	设置数据库所对应的模型文件 models.py
+		设置中文编码方式	# coding: utf-8
+		class Category(models.Model):
+    			name = models.CharField(max_length=10,verbose_name=u'分类名称')
+
+		class Keyword(models.Model):
+    			name = models.CharField(max_length=10, verbose_name=u'关键词')
+
+		class Product(models.Model):
+    			spec_type=(
+        			('1', '大号'),
+        			('2', '中号'),
+        			('3', '小号'),
+    			)
+    			name = models.CharField(max_length=10, verbose_name=u'产品名称')
+    			spec = models.CharField(max_length=1, choices=spec_type,verbose_name=u'产品型号')
+    			cate = models.ForeignKey(Category, verbose_name=u'产品类别')
+    			stock = models.IntegerField(default=100, verbose_name=u'库存数量')
+    			price = models.DecimalField(default=10.00, decimal_places=2, max_digits=8, verbose_name=u'产品价格')
+    			key = models.ManyToManyField(Keyword, verbose_name=u'关键词')
+    			#null=True, blank=True成对出现 null=True指数据库 blank=True指表单
+			desc = models.TextField(null=True, blank=True, verbose_name=u'产品描述')
+	配置数据库 修改settings.py文件
+		DATABASES = {
+    			'default': {
+        			'ENGINE': 'django.db.backends.mysql',
+        			'NAME': 'productdb',
+        			'USER': 'root',
+       				'PASSWORD': 'ct065410'
+
+    			}
+		}
+	在mysql创建数据库productdb
+	makemigrations
+	migrate/syncdb
+
+	createsuperuser创建超级管理员，以便进入Django自带的管理系统
+	在管理系统里注册自己的Model
+		在admin.py文件里添加
+		from product.models import Category,Keyword,Product
+
+		admin.site.register(Category)
+		admin.site.register(Keyword)
+		admin.site.register(Product)
+	在views.py文件添加增删改查方法
+		设置中文编码方式	# coding: utf-8
+	在urls.py文件配置url路由，在urlpatterns中添加
+    		url(r'^add/$', views.add, name='add'),
+    		url(r'^update/(?P<id>\d+)/$', views.update,name='update'),
+    		url(r'^delete/(?P<id>\d+)/$', views.delete,name='delete'),
+    		url(r'^list/$', views.list,name='list'),
+
+	添加产品
+		分页技术
+		from django.core.paginator import Paginator
+
+		views.py
+		products = Product.objects.order_by('-id')
+    		paginator = Paginator(products,1)
+    		try:
+        		page = int(request.GET.get('page'))
+        		products = paginator.page(page)
+    		except:
+        		products = paginator.page(1)
+    		return render(request,'product/list.html',locals())
+		
+		html文件
+		<ul class="pager">
+    		{{ products.number }}/{{ products.paginator.num_pages }}
+  		{% if products.has_previous %}
+  		<li><a href="?page={{ products.previous_page_number }}">上一页</a></li>
+  		{% endif %}
+    		{% if products.has_next %}
+  		<li><a href="?page={{ products.next_page_number }}">下一页</a></li>
+    		{% endif %}
+		</ul>
+
+
+课后思考和练习：
+1、给产品列表的页面增加一个搜索功能（按照(产品名、关键词)、型号、类别、价格区间进行模糊搜索）
+2、改进这个程序，学习使用Django Form并完善这个程序。
+
+Django form的学习资料:
+链接：http://pan.baidu.com/s/1sjTP8vF 密码：6w5n
